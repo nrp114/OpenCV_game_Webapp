@@ -1,1 +1,1 @@
-web: gunicorn CCMS.wsgi --log-file -
+web : gunicorn OpenCV_game_Webapp.wsgi --log-file -
