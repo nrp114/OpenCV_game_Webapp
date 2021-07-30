@@ -1,6 +1,8 @@
-Django>=3.2.5
-opencv-python>=4.5.1.48
-numpy>=1.19.3
-comtypes>=1.1.9
-pynput>=1.7.3
-mediapipe>=0.8.3
+Django~=3.2.5
+opencv-python~=4.5.1.48
+numpy~=1.19.3
+comtypes~=1.1.9
+pycaw~=20181226
+pynput~=1.7.3
+whitenoise~=5.3.0
+mediapipe~=0.8.3
