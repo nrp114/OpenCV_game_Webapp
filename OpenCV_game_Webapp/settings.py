@@ -25,7 +25,7 @@ SECRET_KEY = 'vi(c-u#7w4=8!g60!1)syi_!yqj_km4(1@1pyui%wa+=+-$(0='
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['127.0.0.1','sampledomain.com']
+ALLOWED_HOSTS = ['127.0.0.1','opencv-game.herokuapp.com']
 
 
 # Application definition
