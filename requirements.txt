@@ -111,3 +111,4 @@ whitenoise==5.3.0
 widgetsnbextension==3.5.1
 wrapt==1.12.1
 zipp==3.4.1
+opencv-python-headless
