@@ -1,4 +1,4 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseServerError
 from django.shortcuts import render
 from django.core.mail import EmailMessage
 from django.views.decorators import gzip
@@ -21,11 +21,9 @@ detector = htm.handDetector(detectionCon=0.7)
 @gzip.gzip_page
 def Home(request):
     try:
-        cam = VideoCamera()
-        return StreamingHttpResponse(gen(cam), content_type="multipart/x-mixed-replace;boundary=frame")
-    except:
-        pass
-    return render(request, 'app1.html')
+        return StreamingHttpResponse(gen(VideoCamera()), content_type="multipart/x-mixed-replace;boundary=frame")
+    except HttpResponseServerError as e:
+        print("aborted")
 
 #to capture video class
 
@@ -95,7 +93,11 @@ class VideoCamera(object):
 
 def gen(camera):
     while True:
-        frame = camera.get_frame()
+        frame = None
+        try:
+            frame = camera.get_frame()
+        except:
+            print("error")
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
 
