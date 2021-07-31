@@ -15,6 +15,7 @@ from .hand_module import game
 
 detector = htm.handDetector(detectionCon=0.7)
 
+camera = cv2.VideoCapture(0)
 
 @gzip.gzip_page
 def Home(request):
@@ -22,6 +23,18 @@ def Home(request):
         return StreamingHttpResponse(gen(VideoCamera()), content_type="multipart/x-mixed-replace;boundary=frame")
     except HttpResponseServerError as e:
         print("aborted")
+
+
+def gen_frames():
+    while True:
+        success, frame = camera.read()  # read the camera frame
+        if not success:
+            break
+        else:
+            ret, buffer = cv2.imencode('.jpg', frame)
+            frame = buffer.tobytes()
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # concat frame one by one and show result
 
 
 # to capture video class
