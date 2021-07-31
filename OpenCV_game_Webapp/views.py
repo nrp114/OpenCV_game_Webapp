@@ -11,11 +11,9 @@ import numpy as np
 from . import hand_module as htm
 import math
 
-
 from .hand_module import game
 
 detector = htm.handDetector(detectionCon=0.7)
-
 
 
 @gzip.gzip_page
@@ -25,7 +23,8 @@ def Home(request):
     except HttpResponseServerError as e:
         print("aborted")
 
-#to capture video class
+
+# to capture video class
 
 def score_change(img, score, iswin, target):
     if iswin:
@@ -33,10 +32,35 @@ def score_change(img, score, iswin, target):
     cv2.putText(img, "Score :" + str(score), (50, 50), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0))
     cv2.putText(img, "Aim :" + str(target), (50, 100), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0))
 
+
+class VideoCamera(object):
+    def __init__(self):
+        self.video = cv2.VideoCapture(0)
+
+    def __del__(self):
+        self.video.release()
+
+    def get_frame(self):
+        success, image = self.video.read()
+        # We are using Motion JPEG, but OpenCV defaults to capture raw images,
+        # so we must encode it into JPEG in order to correctly display the
+        # video stream.
+
+        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        # faces_detected = face_detection_videocam.detectMultiScale(gray, scaleFactor=1.3, minNeighbors=5)
+        # for (x, y, w, h) in faces_detected:
+        # cv2.rectangle(image, pt1=(x, y), pt2=(x + w, y + h), color=(255, 0, 0), thickness=2)
+        frame_flip = cv2.flip(image, 1)
+        ret, jpeg = cv2.imencode('.jpg', frame_flip)
+        return jpeg.tobytes()
+
+
+"""""
 class VideoCamera(object):
     time_skip = 100
     time_taken = 0
     final_time = 0
+
     def __init__(self):
         self.time_taken = time.time()
         self.game = htm.game()
@@ -75,7 +99,7 @@ class VideoCamera(object):
                     self.final_time = time.time() - self.time_taken
                 cv2.putText(img, "WON - time taken:" + str(round(self.final_time, 2)) + "sec", (100, 100),
                             cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0))
-            else:# print(length_all)
+            else:  # print(length_all)
                 fist_length = math.hypot(x11 - x4, y11 - y4)
 
                 # print(fist_length)
@@ -83,13 +107,15 @@ class VideoCamera(object):
                 if self.game.check_win(fist_length, x9, y9):
                     print("Hit")
 
-        #print(image)
+        # print(image)
         _, jpeg = cv2.imencode('.jpg', image)
         return jpeg.tobytes()
 
     def update(self):
         while True:
             (self.grabbed, self.frame) = self.video.read()
+
+"""""
 
 def gen(camera):
     while True:
