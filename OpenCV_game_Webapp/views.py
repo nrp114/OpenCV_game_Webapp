@@ -32,7 +32,7 @@ def Home(request):
         print("aborted")
 
 def gen2():
-    camera = cv2.VideoCapture(0)
+    camera = cv2.VideoCapture(-1)
     while True:
         success, frame = camera.read()  # read the camera frame
         print(success)
