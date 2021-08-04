@@ -1,4 +1,4 @@
-from django.http import HttpResponse, HttpResponseServerError
+from django.http import HttpResponse
 from django.shortcuts import render
 from django.core.mail import EmailMessage
 from django.views.decorators import gzip
@@ -10,44 +10,27 @@ import time
 import numpy as np
 from . import hand_module as htm
 import math
+from ctypes import cast, POINTER
+from comtypes import CLSCTX_ALL
+from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
+from pynput.mouse import Button, Controller
 
 from .hand_module import game
 
 detector = htm.handDetector(detectionCon=0.7)
 
-#camera = cv2.VideoCapture(0)
 
-@gzip.gzip_page
-def Home2(request):
-    try:
-        return StreamingHttpResponse(gen(VideoCamera()), content_type="multipart/x-mixed-replace;boundary=frame")
-    except HttpResponseServerError as e:
-        print("aborted")
 
 @gzip.gzip_page
 def Home(request):
     try:
-        return StreamingHttpResponse(gen2(), content_type="multipart/x-mixed-replace;boundary=frame")
-    except HttpResponseServerError as e:
-        print("aborted")
+        cam = VideoCamera()
+        return StreamingHttpResponse(gen(cam), content_type="multipart/x-mixed-replace;boundary=frame")
+    except:
+        pass
+    return render(request, 'app1.html')
 
-def gen2():
-    camera = cv2.VideoCapture(-1)
-    while True:
-        success, frame = camera.read()  # read the camera frame
-        print(success)
-        if not success:
-            print("False")
-            break
-        else:
-            ret, buffer = cv2.imencode('.jpg', frame)
-            frame = buffer.tobytes()
-
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # concat frame one by one and show result
-
-
-# to capture video class
+#to capture video class
 
 def score_change(img, score, iswin, target):
     if iswin:
@@ -55,35 +38,10 @@ def score_change(img, score, iswin, target):
     cv2.putText(img, "Score :" + str(score), (50, 50), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0))
     cv2.putText(img, "Aim :" + str(target), (50, 100), cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0))
 
-
-class VideoCamera(object):
-    def __init__(self):
-        self.video = cv2.VideoCapture(0)
-
-    def __del__(self):
-        self.video.release()
-
-    def get_frame(self):
-        success, image = self.video.read()
-        # We are using Motion JPEG, but OpenCV defaults to capture raw images,
-        # so we must encode it into JPEG in order to correctly display the
-        # video stream.
-
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        # faces_detected = face_detection_videocam.detectMultiScale(gray, scaleFactor=1.3, minNeighbors=5)
-        # for (x, y, w, h) in faces_detected:
-        # cv2.rectangle(image, pt1=(x, y), pt2=(x + w, y + h), color=(255, 0, 0), thickness=2)
-        frame_flip = cv2.flip(image, 1)
-        ret, jpeg = cv2.imencode('.jpg', frame_flip)
-        return jpeg.tobytes()
-
-
-"""""
 class VideoCamera(object):
     time_skip = 100
     time_taken = 0
     final_time = 0
-
     def __init__(self):
         self.time_taken = time.time()
         self.game = htm.game()
@@ -122,7 +80,7 @@ class VideoCamera(object):
                     self.final_time = time.time() - self.time_taken
                 cv2.putText(img, "WON - time taken:" + str(round(self.final_time, 2)) + "sec", (100, 100),
                             cv2.FONT_HERSHEY_COMPLEX, 1, (0, 255, 0))
-            else:  # print(length_all)
+            else:# print(length_all)
                 fist_length = math.hypot(x11 - x4, y11 - y4)
 
                 # print(fist_length)
@@ -130,7 +88,7 @@ class VideoCamera(object):
                 if self.game.check_win(fist_length, x9, y9):
                     print("Hit")
 
-        # print(image)
+        #print(image)
         _, jpeg = cv2.imencode('.jpg', image)
         return jpeg.tobytes()
 
@@ -138,15 +96,9 @@ class VideoCamera(object):
         while True:
             (self.grabbed, self.frame) = self.video.read()
 
-"""""
-
 def gen(camera):
     while True:
-        frame = None
-        try:
-            frame = camera.get_frame()
-        except:
-            print("error")
+        frame = camera.get_frame()
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
 
